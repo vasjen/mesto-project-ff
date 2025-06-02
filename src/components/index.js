@@ -1,6 +1,6 @@
 import '../index.css';
 import { createCard } from './card.js';
-import { openModal, closeModal } from './modal.js';
+import { openModal, closeModal, closeAllPopups } from './modal.js';
 import { enableValidation, clearValidation } from './validation.js';
 import { getInitialCards, getUserData, updateUserData, addNewCard, deleteMyCard, setLike, unSetLike, updateProfileAvatar } from './api.js';
 
@@ -23,6 +23,8 @@ const editProfileButton = document.querySelector('.profile__edit-button');
 const currentAvatar = document.querySelector('.avatar-image');
 const currentName = document.querySelector('.profile__title');
 const currentDescription = document.querySelector('.profile__description');
+const placeNameInput = document.querySelector('[name="place-name"]');
+const linkInput = document.querySelector('[name="link"]');
 const validationConfig = {
     formSelector: '.popup__form',
     inputSelector: '.popup__input',
@@ -47,10 +49,8 @@ allPopups.forEach(popup => {
 addNewCardForm.addEventListener('submit', async function (evt) {
     evt.preventDefault();
     changeButtonTitle(addNewCardForm.querySelector('.button'), "Сохранение...");
-    const placeName = document.querySelector('[name="place-name"]').value;
-    const link = document.querySelector('[name="link"]').value;
     try {
-        const newCard = await addNewCard(placeName, link);
+        const newCard = await addNewCard(placeNameInput.value, linkInput.value);
         cardContainer.prepend(createCard(newCard.owner._id, newCard, { deleteCard, likeCard, imageClick }));
         closeAllPopups();
         addNewCardForm.reset();
@@ -84,8 +84,8 @@ editProfileForm.addEventListener('submit', async function (evt) {
     const inputName = document.querySelector('[name="name"]');
     const currentAvatar = document.querySelector('.avatar-image');
     const inputDescription = document.querySelector('[name="description"]');
-    let currentName = document.querySelector('.profile__title');
-    let currentDescription = document.querySelector('.profile__description');
+    const currentName = document.querySelector('.profile__title');
+    const currentDescription = document.querySelector('.profile__description');
     try {
         await updateUserData(inputName.value, currentAvatar.src, inputDescription.value);
         currentName.textContent = inputName.value;
@@ -100,26 +100,23 @@ editProfileForm.addEventListener('submit', async function (evt) {
 
 editAvatarButton.addEventListener('click', () => {
     openModal(updateAvatarPopup);
-    const openedPopup = document.querySelector('.popup_is-opened');
-    clearValidation(openedPopup, validationConfig);
+    clearValidation(updateAvatarPopup, validationConfig);
 });
 
 editProfileButton.addEventListener('click', () => {
     openModal(editProfilePopup);
-    const openedPopup = document.querySelector('.popup_is-opened');
-    clearValidation(openedPopup, validationConfig);
+    clearValidation(editProfilePopup, validationConfig);
     const inputName = document.querySelector('[name="name"]');
     const inputDescription = document.querySelector('[name="description"]');
-    let currentName = document.querySelector('.profile__title').textContent;
-    let currentDescription = document.querySelector('.profile__description').textContent;
+    const currentName = document.querySelector('.profile__title').textContent;
+    const currentDescription = document.querySelector('.profile__description').textContent;
     inputName.value = currentName;
     inputDescription.value = currentDescription;
 });
 
 addCardButton.addEventListener('click', () => {
     openModal(newCardPopup);
-    const openedPopup = document.querySelector('.popup_is-opened');
-    clearValidation(openedPopup, validationConfig);
+    clearValidation(newCardPopup, validationConfig);
 });
 
 function changeButtonTitle(button, text) {
@@ -172,12 +169,6 @@ async function likeCard(item, cardLike, cardLikeCount) {
     }
 }
 
-function closeAllPopups() {
-    const openedPopup = document.querySelector('.popup_is-opened');
-    if (openedPopup) {
-        closeModal(openedPopup);
-    }
-}
 
 async function showCards(user, initialCards) {
     const allCards = cardContainer.querySelectorAll('.places__item');

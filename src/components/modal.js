@@ -13,3 +13,10 @@ function closeByEscape (evt) {
         closeModal(document.querySelector('.popup_is-opened'));
     }
 }
+
+export function closeAllPopups() {
+    const openedPopup = document.querySelector('.popup_is-opened');
+    if (openedPopup) {
+        closeModal(openedPopup);
+    }
+}
